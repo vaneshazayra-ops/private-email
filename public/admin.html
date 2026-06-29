@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temporary eMail - Admin Panel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #1a1a2e; color: #eee; line-height: 1.6; }
+    .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+    
+    .header { text-align: center; padding: 30px 0 20px; border-bottom: 2px solid #16213e; margin-bottom: 30px; }
+    .header h1 { font-size: 1.8em; color: #0f3460; color: #e94560; }
+    .header p { color: #888; }
+
+    .login-box { background: #16213e; padding: 30px; border-radius: 8px; max-width: 400px; margin: 80px auto; }
+    .login-box h2 { text-align: center; margin-bottom: 20px; color: #e94560; }
+    .login-box input { width: 100%; padding: 12px; border: 1px solid #0f3460; border-radius: 4px; background: #1a1a2e; color: #eee; font-size: 1em; margin-bottom: 15px; }
+    .login-box button { width: 100%; padding: 12px; background: #e94560; color: #fff; border: none; border-radius: 4px; font-size: 1em; cursor: pointer; }
+    .login-box button:hover { background: #c23152; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .stat-card { background: #16213e; padding: 20px; border-radius: 8px; text-align: center; }
+    .stat-card .number { font-size: 2em; color: #e94560; font-weight: bold; }
+    .stat-card .label { color: #888; font-size: 0.85em; margin-top: 5px; }
+
+    .section { background: #16213e; padding: 25px; border-radius: 8px; margin-bottom: 25px; }
+    .section h2 { color: #e94560; margin-bottom: 15px; font-size: 1.2em; }
+
+    .domain-list { list-style: none; }
+    .domain-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #1a1a2e; border-radius: 4px; margin-bottom: 8px; }
+    .domain-item .domain-name { font-size: 1em; color: #eee; }
+    .domain-item .domain-emails { color: #888; font-size: 0.85em; }
+    .domain-item button { padding: 5px 12px; background: #e74c3c; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-size: 0.8em; }
+    .domain-item button:hover { background: #c0392b; }
+
+    .add-domain { display: flex; gap: 10px; margin-top: 15px; }
+    .add-domain input { flex: 1; padding: 10px; border: 1px solid #0f3460; border-radius: 4px; background: #1a1a2e; color: #eee; font-size: 0.95em; }
+    .add-domain button { padding: 10px 20px; background: #27ae60; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.95em; }
+    .add-domain button:hover { background: #229954; }
+
+    .info-box { background: #1a1a2e; padding: 15px; border-radius: 4px; margin-top: 10px; }
+    .info-box p { margin-bottom: 8px; font-size: 0.9em; }
+    .info-box code { background: #0f3460; padding: 2px 6px; border-radius: 3px; color: #e94560; }
+
+    .nav { display: flex; gap: 10px; margin-bottom: 20px; }
+    .nav a { color: #888; text-decoration: none; padding: 8px 15px; border-radius: 4px; background: #16213e; }
+    .nav a:hover { color: #e94560; }
+
+    .toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 4px; color: #fff; font-size: 0.9em; z-index: 999; animation: fadeIn 0.3s; }
+    .toast.success { background: #27ae60; }
+    .toast.error { background: #e74c3c; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .logout-btn { position: absolute; top: 20px; right: 20px; padding: 8px 15px; background: #333; color: #888; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+    .logout-btn:hover { color: #e94560; }
+
+    .guide-step { background: #1a1a2e; padding: 12px 15px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #e94560; }
+    .guide-step strong { color: #e94560; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-box">
+      <h2>&#128274; Admin Panel</h2>
+      <input type="password" id="passwordInput" placeholder="Password admin" onkeypress="if(event.key==='Enter')login()">
+      <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="panel">
+      <button class="logout-btn" onclick="logout()">Logout</button>
+      
+      <div class="header">
+        <h1>&#9881; Temporary eMail Admin</h1>
+        <p>Kelola domain dan lihat statistik</p>
+      </div>
+
+      <div class="nav">
+        <a href="/">&#8592; Kembali ke Inbox</a>
+      </div>
+
+      <!-- Statistics -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="number" id="statEmails">0</div>
+          <div class="label">Total Email</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="statMailboxes">0</div>
+          <div class="label">Mailbox</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="statUnread">0</div>
+          <div class="label">Belum Dibaca</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="statDomains">0</div>
+          <div class="label">Domain</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="statToday">0</div>
+          <div class="label">Email Hari Ini</div>
+        </div>
+      </div>
+
+      <!-- Per Domain Stats -->
+      <div class="section">
+        <h2>&#128202; Statistik Per Domain</h2>
+        <div id="domainStats"></div>
+      </div>
+
+      <!-- Domain Management -->
+      <div class="section">
+        <h2>&#127760; Kelola Domain</h2>
+        <div id="domainList" class="domain-list"></div>
+        <div class="add-domain">
+          <input type="text" id="newDomain" placeholder="contoh: mydomain.com">
+          <button onclick="autoSetupDomain()">+ Tambah & Auto Setup</button>
+        </div>
+        <div id="setupProgress" style="display:none; margin-top:15px;">
+          <div class="info-box" id="setupLog"></div>
+        </div>
+        <div id="nameserverInfo" style="display:none; margin-top:15px;" class="info-box">
+          <p style="color:#e94560;"><strong>&#9888; PENTING:</strong></p>
+          <p>Ganti nameserver domain Anda ke:</p>
+          <p id="nsValues" style="color:#27ae60; font-weight:bold;"></p>
+          <p style="margin-top:8px; font-size:0.85em; color:#888;">Ganti di panel tempat Anda beli domain (Jagoan Hosting/Namecheap/dll). Setelah diganti, tunggu 5-30 menit.</p>
+        </div>
+      </div>
+
+      <!-- Setup Guide -->
+      <div class="section">
+        <h2>&#128218; Cara Tambah Domain Baru</h2>
+        <div class="guide-step">
+          <strong>Step 1 &#9989; OTOMATIS:</strong><br>
+          Ketik nama domain di kolom di atas → klik "Tambah & Auto Setup".<br>
+          <span style="color:#888">App akan otomatis menambahkan domain ke Cloudflare dan mengatur MX records.</span>
+        </div>
+        <div class="guide-step">
+          <strong>Step 2 &#9997; MANUAL — Ganti Nameserver:</strong><br>
+          1. Login ke panel tempat Anda beli domain (Jagoan Hosting / Namecheap / dll)<br>
+          2. Cari pengaturan "Nameserver" atau "DNS"<br>
+          3. Ganti nameserver ke yang ditampilkan app setelah setup (contoh: <code>xxx.ns.cloudflare.com</code>)<br>
+          4. Simpan. Tunggu 5-30 menit sampai aktif.<br>
+          <span style="color:#888">Ini hanya dilakukan 1 kali per domain.</span>
+        </div>
+        <div class="guide-step">
+          <strong>Step 3 &#9997; MANUAL — Enable Email Routing:</strong><br>
+          1. Buka <a href="https://dash.cloudflare.com" target="_blank" style="color:#3498db">dash.cloudflare.com</a><br>
+          2. Klik domain yang baru ditambahkan<br>
+          3. Menu kiri → klik <strong>"Email"</strong> → <strong>"Email Routing"</strong><br>
+          4. Klik link biru <strong>"Enable Email Routing"</strong><br>
+          <span style="color:#888">Hanya 1 kali klik. Setelah aktif, status berubah jadi "Ready".</span>
+        </div>
+        <div class="guide-step">
+          <strong>Step 4 &#9997; MANUAL — Arahkan Email ke Worker:</strong><br>
+          1. Masih di halaman Email Routing, klik tab <strong>"Routing rules"</strong><br>
+          2. Di bagian <strong>"Catch-all address"</strong> → klik <strong>Edit</strong><br>
+          3. Ubah Action menjadi: <strong>"Send to a Worker"</strong><br>
+          4. Pilih worker: <strong>richmail-worker</strong><br>
+          5. Klik <strong>Save</strong><br>
+          <span style="color:#888">Ini supaya semua email yang masuk diteruskan ke Temporary eMail.</span>
+        </div>
+        <div class="guide-step" style="border-left-color:#27ae60">
+          <strong>&#127881; Selesai!</strong><br>
+          Sekarang semua email ke @domainbaru.com akan masuk ke Temporary eMail.<br>
+          Buka halaman utama → generate/buat alamat email dengan domain baru → kirim test email dari Gmail.
+        </div>
+      </div>
+
+      <!-- Webhook Info -->
+      <div class="section">
+        <h2>&#128272; Webhook Info</h2>
+        <div class="info-box">
+          <p><strong>URL:</strong> <code id="webhookUrl"></code></p>
+          <p><strong>Secret:</strong> <code id="webhookSecret"></code></p>
+          <p><strong>Email Expiry:</strong> <code id="emailExpiry"></code> menit</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var token = localStorage.getItem('tempmail_admin_token') || '';
+    if (token) { showPanel(); }
+
+    function toast(msg, type) {
+      var t = document.createElement('div');
+      t.className = 'toast ' + (type || 'success');
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(function() { t.remove(); }, 3000);
+    }
+
+    async function api(path, options) {
+      options = options || {};
+      options.headers = options.headers || {};
+      options.headers['Content-Type'] = 'application/json';
+      options.headers['Authorization'] = 'Bearer ' + token;
+      var res = await fetch(path, options);
+      return await res.json();
+    }
+
+    async function login() {
+      var pw = document.getElementById('passwordInput').value;
+      var res = await fetch('/admin/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+      var data = await res.json();
+      if (data.success) {
+        token = data.token;
+        localStorage.setItem('tempmail_admin_token', token);
+        showPanel();
+        toast('Login berhasil!');
+      } else {
+        toast('Password salah!', 'error');
+      }
+    }
+
+    function logout() {
+      token = '';
+      localStorage.removeItem('tempmail_admin_token');
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('adminPanel').classList.remove('active');
+    }
+
+    async function showPanel() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminPanel').classList.add('active');
+      await loadStats();
+      await loadDomains();
+      await loadConfig();
+    }
+
+    async function loadStats() {
+      var data = await api('/admin/api/stats');
+      if (data) {
+        document.getElementById('statEmails').textContent = data.totalEmails || 0;
+        document.getElementById('statMailboxes').textContent = data.totalMailboxes || 0;
+        document.getElementById('statUnread').textContent = data.unreadEmails || 0;
+        document.getElementById('statDomains').textContent = (data.domains || []).length;
+        document.getElementById('statToday').textContent = data.todayEmails || 0;
+
+        // Render per-domain stats
+        var statsDiv = document.getElementById('domainStats');
+        if (data.domains && data.domains.length > 0) {
+          var html = '';
+          data.domains.forEach(function(d) {
+            html += '<div class="domain-item"><div><span class="domain-name">' + d.domain + '</span><br><span style="color:#888;font-size:0.8em">' + d.mailboxes + ' mailbox</span></div><div style="text-align:right"><span style="color:#e94560;font-size:1.3em;font-weight:bold">' + d.emails + '</span><br><span style="color:#888;font-size:0.8em">email</span></div></div>';
+          });
+          statsDiv.innerHTML = html;
+        } else {
+          statsDiv.innerHTML = '<p style="color:#888">Belum ada data</p>';
+        }
+      }
+    }
+
+    async function loadDomains() {
+      var data = await api('/admin/api/domains');
+      if (data && data.domains) {
+        var list = document.getElementById('domainList');
+        list.innerHTML = '';
+        data.domains.forEach(function(domain) {
+          var item = document.createElement('div');
+          item.className = 'domain-item';
+          item.innerHTML = '<div><span class="domain-name">' + domain + '</span></div><div><button onclick="reSetupDomain(\'' + domain + '\')" style="margin-right:5px;background:#3498db;border-color:#3498db">Re-setup</button><button onclick="removeDomain(\'' + domain + '\')">Hapus</button></div>';
+          list.appendChild(item);
+        });
+      }
+    }
+
+    async function loadConfig() {
+      var data = await api('/admin/api/config');
+      if (data) {
+        document.getElementById('webhookUrl').textContent = location.origin + data.webhookUrl;
+        document.getElementById('webhookSecret').textContent = data.webhookSecret;
+        document.getElementById('emailExpiry').textContent = data.emailExpiry;
+      }
+    }
+
+    async function autoSetupDomain() {
+      var input = document.getElementById('newDomain');
+      var domain = input.value.trim().toLowerCase();
+      if (!domain) { toast('Masukkan domain!', 'error'); return; }
+      if (!/^[a-z0-9][a-z0-9.-]+\.[a-z]{2,}$/.test(domain)) {
+        toast('Format domain tidak valid!', 'error'); return;
+      }
+      var progress = document.getElementById('setupProgress');
+      var log = document.getElementById('setupLog');
+      var nsInfo = document.getElementById('nameserverInfo');
+      progress.style.display = 'block';
+      nsInfo.style.display = 'none';
+      log.innerHTML = '<p>&#9203; Menyiapkan domain ' + domain + '...</p>';
+      var data = await api('/admin/api/domains/auto-setup', {
+        method: 'POST',
+        body: JSON.stringify({ domain: domain })
+      });
+      if (data && data.success) {
+        var html = '';
+        if (data.steps) {
+          data.steps.forEach(function(s) {
+            var icon = s.status === 'done' ? '&#9989;' : s.status === 'warning' ? '&#9888;' : '&#10060;';
+            html += '<p>' + icon + ' ' + s.step + (s.info ? ' (' + s.info + ')' : '') + '</p>';
+          });
+        }
+        html += '<p style="color:#27ae60;margin-top:10px"><strong>&#9989; ' + (data.message || 'Berhasil!') + '</strong></p>';
+        log.innerHTML = html;
+        if (data.nameservers && data.nameservers.length > 0) {
+          nsInfo.style.display = 'block';
+          document.getElementById('nsValues').textContent = data.nameservers.join('\n');
+        }
+        toast('Domain ' + domain + ' berhasil di-setup!');
+        input.value = '';
+        loadDomains();
+        loadStats();
+      } else {
+        log.innerHTML = '<p style="color:#e74c3c">&#10060; Gagal: ' + (data.error || 'Unknown error') + '</p>';
+        toast(data.error || 'Gagal setup domain', 'error');
+      }
+    }
+
+    async function removeDomain(domain) {
+      if (!confirm('Hapus domain ' + domain + '?')) return;
+      var data = await api('/admin/api/domains?domain=' + encodeURIComponent(domain), { method: 'DELETE' });
+      if (data && data.success) {
+        toast('Domain ' + domain + ' dihapus!');
+        loadDomains();
+        loadStats();
+      } else {
+        toast(data.error || 'Gagal menghapus', 'error');
+      }
+    }
+
+    async function reSetupDomain(domain) {
+      var progress = document.getElementById('setupProgress');
+      var log = document.getElementById('setupLog');
+      var nsInfo = document.getElementById('nameserverInfo');
+      progress.style.display = 'block';
+      nsInfo.style.display = 'none';
+      log.innerHTML = '<p>&#9203; Re-setup domain ' + domain + '...</p>';
+      var data = await api('/admin/api/domains/auto-setup', {
+        method: 'POST',
+        body: JSON.stringify({ domain: domain })
+      });
+      if (data && data.success) {
+        var html = '';
+        if (data.steps) {
+          data.steps.forEach(function(s) {
+            var icon = s.status === 'done' ? '&#9989;' : s.status === 'warning' ? '&#9888;' : '&#10060;';
+            html += '<p>' + icon + ' ' + s.step + (s.info ? ' (' + s.info + ')' : '') + '</p>';
+          });
+        }
+        html += '<p style="color:#27ae60;margin-top:10px"><strong>&#9989; ' + (data.message || 'Berhasil!') + '</strong></p>';
+        log.innerHTML = html;
+        if (data.nameservers && data.nameservers.length > 0) {
+          nsInfo.style.display = 'block';
+          document.getElementById('nsValues').textContent = data.nameservers.join('\n');
+        }
+        toast('Re-setup ' + domain + ' berhasil!');
+      } else {
+        log.innerHTML = '<p style="color:#e74c3c">&#10060; Gagal: ' + (data.error || 'Unknown error') + '</p>';
+        toast(data.error || 'Gagal re-setup', 'error');
+      }
+    }
+
+    document.getElementById('newDomain').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') autoSetupDomain();
+    });
+  </script>
+</body>
+</html>

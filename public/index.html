@@ -1,1 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temporary eMail - Disposable Email Service</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px">
+        <img src="logo.svg" alt="Temporary eMail" style="width:50px;height:50px;border-radius:50%">
+        <h1>Temporary eMail</h1>
+      </div>
+      <p class="subtitle">Disposable Email Service</p>
+      <button id="themeToggle" class="btn-theme-toggle" title="Toggle Dark/Light Mode">
+        <span id="themeIcon">&#127769;</span>
+      </button>
+    </header>
 
+    <!-- Email Address Section -->
+    <section class="address-section">
+      <h2>Your Temporary Email Address</h2>
+      <div class="address-box">
+        <input type="text" id="emailAddress" readonly placeholder="Click 'Generate' to get an address">
+        <button id="copyBtn" class="btn btn-copy" title="Copy to clipboard">Copy</button>
+      </div>
+      <div class="address-controls">
+        <div class="domain-select">
+          <label for="domainSelect">Domain:</label>
+          <select id="domainSelect"></select>
+        </div>
+        <button id="generateBtn" class="btn btn-primary">Generate New Address</button>
+      </div>
+      <div class="custom-address">
+        <label for="customUsername">Or use custom username:</label>
+        <div class="custom-input-group">
+          <input type="text" id="customUsername" placeholder="your.name">
+          <span id="customDomainLabel">@domain.com</span>
+          <button id="customBtn" class="btn btn-secondary">Use This</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Inbox Section -->
+    <section class="inbox-section">
+      <div class="inbox-header">
+        <h2>Inbox <span id="emailCount" class="badge">0</span></h2>
+        <div class="inbox-actions">
+          <button id="refreshBtn" class="btn btn-small">&#8635; Refresh</button>
+          <button id="deleteAllBtn" class="btn btn-small btn-danger">&#128465; Delete All</button>
+        </div>
+      </div>
+      <div class="auto-refresh-info">
+        <label><input type="checkbox" id="autoRefresh" checked> Auto-refresh every 5 seconds</label>
+      </div>
+      <div id="emailList" class="email-list">
+        <div class="empty-inbox">
+          <p>&#128236; No emails yet</p>
+          <p class="hint">Waiting for incoming emails...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Email View Modal -->
+    <div id="emailModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button id="backBtn" class="btn btn-small">&larr; Back to Inbox</button>
+          <button id="deleteEmailBtn" class="btn btn-small btn-danger">&#128465; Delete</button>
+        </div>
+        <div class="email-detail">
+          <div class="email-meta">
+            <div class="meta-row"><strong>From:</strong> <span id="emailFrom"></span></div>
+            <div class="meta-row"><strong>To:</strong> <span id="emailTo"></span></div>
+            <div class="meta-row"><strong>Subject:</strong> <span id="emailSubject"></span></div>
+            <div class="meta-row"><strong>Date:</strong> <span id="emailDate"></span></div>
+          </div>
+          <div class="email-body-tabs">
+            <button id="tabHtml" class="tab-btn active">HTML</button>
+            <button id="tabText" class="tab-btn">Text</button>
+            <button id="tabSource" class="tab-btn">Source</button>
+          </div>
+          <div id="emailBody" class="email-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <section class="info-section">
+      <h2>&#9881; Info</h2>
+      <div class="info-box">
+        <p><strong>Email Expiry:</strong> <span id="emailExpiry"></span> minutes</p>
+        <p><strong>Status:</strong> <span class="status-online">&#9679; Online</span></p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Copyright <a href="https://t.me/ChRichStore" target="_blank">Rich Store</a></p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
