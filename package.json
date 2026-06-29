@@ -1,0 +1,12 @@
+{
+  "name": "temp-mail",
+  "version": "1.0.0",
+  "description": "Temporary Email Application with Custom Domain Support",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node server/app.js"
+  },
+  "dependencies": {},
+  "keywords": ["temp-mail", "disposable-email", "custom-domain"],
+  "license": "MIT"
+}

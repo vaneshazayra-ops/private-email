@@ -1,0 +1,34 @@
+# Fly.io Configuration for RichMail
+# Deploy: flyctl deploy
+
+app = "richmail"
+primary_region = "sin"  # Singapore (dekat Indonesia)
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  MAIL_DOMAINS = "yourdomain.com"
+  SMTP_PORT = "25"
+  WEB_PORT = "8080"
+  EMAIL_EXPIRY = "60"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+# SMTP Service - untuk terima email
+[[services]]
+  internal_port = 25
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 25
+
+# Persistent storage untuk emails
+[mounts]
+  source = "richmail_data"
+  destination = "/app/data"

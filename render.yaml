@@ -1,0 +1,21 @@
+# Render.com Blueprint - Auto deploy config
+# PENTING: Ganti semua value di bawah dengan milik Anda sendiri!
+services:
+  - type: web
+    name: richmail
+    runtime: node
+    buildCommand: echo "No build needed"
+    startCommand: node server/app.js
+    envVars:
+      - key: MAIL_DOMAINS
+        value: yourdomain.com
+      - key: WEBHOOK_SECRET
+        value: your-secret-key-here
+      - key: ADMIN_PASSWORD
+        value: your-admin-password-here
+      - key: EMAIL_EXPIRY
+        value: "60"
+    disk:
+      name: mail-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

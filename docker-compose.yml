@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  richmail:
+    build: .
+    container_name: richmail
+    restart: always
+    ports:
+      - "80:3000"      # Web interface (HTTP)
+      - "25:25"        # SMTP (receive emails)
+    environment:
+      # === GANTI DENGAN DOMAIN ANDA ===
+      - MAIL_DOMAINS=yourdomain.com
+      # Port 25 untuk production SMTP
+      - SMTP_PORT=25
+      # Web tetap di 3000 (di-map ke port 80)
+      - WEB_PORT=3000
+      # Email expired dalam 60 menit (ubah sesuai kebutuhan)
+      - EMAIL_EXPIRY=60
+    volumes:
+      - mail_data:/app/data
+
+volumes:
+  mail_data:
+    driver: local
